@@ -1,0 +1,64 @@
+WRITELINE MACRO VAR
+	LEA DX, VAR
+	MOV AH, 09
+	INT 21H
+ENDM
+CLRSCR MACRO
+	MOV AX, 0600H	
+	MOV CX, 0	; Top and left Corners
+	MOV DH, 24	; Row 
+	MOV DL, 79	; Column
+	MOV BH, 3	; Color attribute
+	INT 10H
+ENDM
+.MODEL SMALL
+
+.DATA
+	ENTROW DB 10, 13, 'Enter the row (00 - 24): $'
+	ENTCOL DB 10, 13, 'Enter the column (00 - 79): $'
+	CURSOR DB '_$'
+	ROW DB ?
+	COL DB ?
+
+.CODE
+	MOV AX, @DATA
+	MOV DS, AX
+
+	WRITELINE ENTROW
+	CALL READ 
+	MOV ROW, AL
+
+	WRITELINE ENTCOL
+	CALL READ
+	MOV COL, AL
+
+	MOV AH, 2
+	MOV DH, ROW
+	MOV DL, COL
+	INT 10H
+
+	CLRSCR
+	WRITELINE CURSOR
+
+	JMP EOF
+
+	READ PROC NEAR
+		MOV AH, 1
+		INT 21H
+
+		AND AL, 0FH
+		MOV BL, AL
+		
+		MOV AH, 1
+		INT 21H
+
+		AND AL, 0FH
+		MOV AH, BL
+		AAD
+		RET
+	READ ENDP
+	
+	EOF:
+		MOV AH, 4CH
+		INT 21H
+END

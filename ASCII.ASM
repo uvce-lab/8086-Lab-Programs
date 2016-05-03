@@ -1,0 +1,68 @@
+WRITELINE MACRO MSG
+    MOV AH, 09H
+    MOV DX, OFFSET MSG
+    INT 21H
+ENDM
+.MODEL SMALL
+.DATA
+    ENT DB 'Press a key: $'
+    REDISP DB 4	DUP(0)
+.CODE
+    MOV AX, @DATA
+    MOV DS, AX
+    WRITELINE ENT
+   
+    MOV AH, 01H
+    INT 21H
+    MOV AH, 00H
+    
+	MOV SI, OFFSET REDISP
+    CALL HEX2ASC
+
+	; Clear the Screen
+    MOV BH, 0007H
+    MOV CX, 0000H
+    MOV DX, 184FH
+    MOV AX, 0600H
+    INT 10H
+
+	; BH, DH, DL --> Page, Row, Column
+    MOV AH, 02H
+    MOV BH, 0
+    MOV DH, 12
+    MOV DL, 40
+    INT 10H
+
+    WRITELINE REDISP
+    MOV AH, 4CH
+    INT 21H
+
+    HEX2ASC PROC NEAR
+		MOV CX, 0
+		MOV BX, 10
+		DIVIDE:
+			MOV DX, 0
+			DIV BX
+			ADD DL, '0'
+			PUSH DX
+			INC CX
+			CMP AX, 10
+			JGE DIVIDE
+		ADD AL, '0'
+		MOV [SI], AL
+		
+		BUILDUP:
+		POP AX
+		INC SI
+		MOV [SI], AL
+		LOOP BUILDUP
+
+		INC SI
+		MOV AL, '$'
+		MOV [SI], AL
+		
+		RET
+    HEX2ASC ENDP
+    END
+
+

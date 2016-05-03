@@ -1,0 +1,52 @@
+PUTCHAR MACRO CHAR
+	MOV DL, CHAR
+	MOV AH, 2
+	INT 21H
+ENDM
+
+WRITE MACRO VAR
+	MOV AH, 9
+	LEA DX, VAR
+	INT 21H
+ENDM
+
+READLINE MACRO STRING
+	MOV AH, 0AH          
+	LEA DX, STRING
+	INT 21H
+ENDM 
+
+
+.MODEL SMALL
+.DATA
+	MYNAME DB 25 DUP('$')
+    ENT DB 'Enter your name: $'
+    RES DB 'What is your name? $'
+.CODE
+    MOV AX, @DATA
+    MOV DS, AX
+   
+	;DISPLAY ENTER MESSAGE
+    WRITE ENT
+	READLINE MYNAME
+
+	; Clear the Screen
+    MOV BH, 0007H
+    MOV CX, 0000H
+    MOV DX, 184FH
+    MOV AX, 0600H
+    INT 10H
+
+	; BH, DH, DL --> Page, Row, Column
+    MOV AH, 02H
+    MOV BH, 0
+    MOV DH, 12
+    MOV DL, 5
+    INT 10H
+
+	WRITE RES
+	WRITE MYNAME + 2
+
+	MOV AH, 4CH
+	INT 21H
+END
